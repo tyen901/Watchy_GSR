@@ -214,17 +214,17 @@ void WatchyStarfield::drawDate()
     // WatchyGSR::display.println(tmYearToCalendar(WatchTime.Local.Year));// offset from 1970, since year is stored in uint8_t
 
     int da = WatchTime.Local.Day;
-    int ye = WatchTime.Local.Year + 1970;
+    int year = WatchTime.Local.Year + WatchyGSR::SRTC.getLocalYearOffset();
 
     int a = da / 10;
     int b = da % 10;
-    int c = ye / 1000;
-    ye = ye % 1000;
-    int d = ye / 100;
-    ye = ye % 100;
-    int e = ye / 10;
-    ye = ye % 10;
-    int f = ye;
+    int c = year / 1000;
+    year = year % 1000;
+    int d = year / 100;
+    year = year % 100;
+    int e = year / 10;
+    year = year % 10;
+    int f = year;
 
     if (a == 0)
         WatchyGSR::display.drawBitmap(8, 95, dd_0, 16, 25, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
@@ -560,8 +560,7 @@ void WatchyStarfield::drawMoon()
 {
     moonData_t moon; // variable to receive the data
 
-    // January 31st, 2020 @ 1:30PM UTC
-    int year = WatchTime.Local.Year + 1970;
+    int year = WatchTime.Local.Year + WatchyGSR::SRTC.getLocalYearOffset();
     int32_t month = WatchTime.Local.Month;
     int32_t day = WatchTime.Local.Day;
     double hour = WatchTime.Local.Hour + 0.1;
@@ -628,7 +627,7 @@ void WatchyStarfield::drawMoon()
 void WatchyStarfield::drawSun()
 {
     Dusk2Dawn location(LOC);
-    int year = WatchTime.Local.Year + 1970;
+    int year = WatchTime.Local.Year + WatchyGSR::SRTC.getLocalYearOffset();
     int32_t month = WatchTime.Local.Month;
     int32_t day = WatchTime.Local.Day;
     int sr = location.sunrise(year, month, day, false);
