@@ -34,15 +34,20 @@ void WatchyStarfield::handleButtonPress(uint8_t SwitchNumber)
 
 void WatchyStarfield::drawWatchFace()
 {
+    WatchyGSR watchyGSR;
+
     WatchyGSR::display.fillScreen(DARKMODE ? GxEPD_BLACK : GxEPD_WHITE);
     WatchyGSR::display.setTextColor(DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
+    
     drawField();
     drawTime();
     drawDate();
     drawSteps();
     drawBattery();
+
+    bool isWifiConnected = watchyGSR.WiFiStatus() == WL_CONNECTED;
     
-    WatchyGSR::display.drawBitmap(118, 168, wifiConnected ? wifi : wifioff, 25, 18, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
+    WatchyGSR::display.drawBitmap(118, 168, isWifiConnected ? wifi : wifioff, 25, 18, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
 
     drawMoon();
     drawSun();
@@ -366,9 +371,8 @@ void WatchyStarfield::drawSteps()
         //sensor.resetStepCounter();
         // stepCount = 0;
     }
-
-    //uint32_t stepCount = sensor.getCounter();
-    uint32_t stepCount = 0;
+    WatchyGSR watchyGSR;
+    uint32_t stepCount = watchyGSR.CurrentStepCount();
 
     // WatchyGSR::display.drawBitmap(10, 165, steps, 19, 23, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
     // WatchyGSR::display.setCursor(6, 190);

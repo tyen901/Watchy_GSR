@@ -5,7 +5,6 @@
 // Place all of your data and variables here.
 
 // Remember RTC_DATA_ATTR for your variables so they don't get wiped on deep sleep.
-RTC_DATA_ATTR uint8_t CurrentStyle = 0;
 RTC_DATA_ATTR uint8_t StarfieldStyle;
 
 class OverrideGSR : public WatchyGSR
@@ -44,16 +43,16 @@ public:
   */
  
   WatchyStarfield StarfieldWatchFace;
-
+/* 
   void InsertWiFi()
   {
-    StarfieldWatchFace.setWifiConnected(true);
   };
-
+*/
+/* 
   void InsertWiFiEnding()
   {
-    StarfieldWatchFace.setWifiConnected(true);
   };
+*/
 
   // The next 3 functions allow you to add your own WatchFaces, there are examples that do work below.
   void InsertAddWatchStyles()
@@ -120,16 +119,15 @@ public:
         StarfieldWatchFace.drawWatchFace();
       }
     }
-    CurrentStyle = StyleID;
   };
 
   bool InsertHandlePressed(uint8_t SwitchNumber, bool &Haptic, bool &Refresh)
   {
-      if (CurrentStyle == StarfieldStyle)
+      if (CurrentStyleID() == StarfieldStyle)
       {
         StarfieldWatchFace.handleButtonPress(SwitchNumber);
         Haptic = true;  // Cause Hptic feedback if set to true.
-        Refresh = true; // Cause the screen to be refreshed (redrwawn).
+        Refresh = true; // Cause the screen to be refreshed (redrawn).
         return true;    // Respond with "I used a button", so the WatchyGSR knows you actually did something with a button.
       }
 
