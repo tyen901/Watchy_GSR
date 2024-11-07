@@ -14,6 +14,7 @@
 
 class WatchyStarfield {
     public:
+        void handleButtonPress(uint8_t SwitchNumber);
         void drawWatchFace();
         void drawTime();
         void drawDate();
@@ -22,12 +23,7 @@ class WatchyStarfield {
         void drawField();
         void drawMoon();
         void drawSun();
-        void handleButtonPress(uint8_t SwitchNumber);
-
-        void setWifiConnected(bool connected) { wifiConnected = connected; }
-    private:
-        bool wifiConnected = false;
-
+        void drawWeather();
 };
 
 #endif
