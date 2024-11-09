@@ -110,23 +110,25 @@ void WatchyStarfield::drawDate()
     int16_t x1, y1;
     uint16_t textWidth, textHeight;
 
-    String dayOfWeek = dayStr(WatchTime.Local.Wday);
-    dayOfWeek = dayOfWeek.substring(0, dayOfWeek.length() - 3);
-    WatchyGSR::display.getTextBounds(dayOfWeek, 5, 85, &x1, &y1, &textWidth, &textHeight);
+    int day = WatchTime.Local.Day;
+    int dayOfWeek = WatchTime.Local.Wday;
+    int month = WatchTime.Local.Month;
+    int year = WatchTime.Local.Year + WatchyGSR::SRTC.getLocalYearOffset();
+
+    String dayOfWeekName = dayStr(dayOfWeek + 1); // offset by 1 to correct for 0-indexing
+    dayOfWeekName = dayOfWeekName.substring(0, dayOfWeekName.length() - 3);
+    WatchyGSR::display.getTextBounds(dayOfWeekName, 5, 85, &x1, &y1, &textWidth, &textHeight);
     if (WatchTime.Local.Wday == 4)
     {
         textWidth -= 5;
     }
     WatchyGSR::display.setCursor(76 - textWidth, 86);
-    WatchyGSR::display.println(dayOfWeek);
+    WatchyGSR::display.println(dayOfWeekName);
 
-    String month = monthShortStr(WatchTime.Local.Month);
-    WatchyGSR::display.getTextBounds(month, 60, 110, &x1, &y1, &textWidth, &textHeight);
+    String monthName = monthShortStr(month + 1); // offset by 1 to correct for 0-indexing
+    WatchyGSR::display.getTextBounds(monthName, 60, 110, &x1, &y1, &textWidth, &textHeight);
     WatchyGSR::display.setCursor(79 - textWidth, 110);
-    WatchyGSR::display.println(month);
-
-    int day = WatchTime.Local.Day;
-    int year = WatchTime.Local.Year + WatchyGSR::SRTC.getLocalYearOffset();
+    WatchyGSR::display.println(monthName);
 
     int dayTens = day / 10;
     int dayUnits = day % 10;
@@ -217,9 +219,9 @@ void WatchyStarfield::drawMoon()
 {
     moonData_t moon; // variable to receive the data
 
-    int year = WatchTime.Local.Year + WatchyGSR::SRTC.getLocalYearOffset();
-    int32_t month = WatchTime.Local.Month;
     int32_t day = WatchTime.Local.Day;
+    int32_t month = WatchTime.Local.Month;
+    int year = WatchTime.Local.Year + WatchyGSR::SRTC.getLocalYearOffset();
     double hour = WatchTime.Local.Hour + 0.1;
 
     moon = moonP.getPhase(year, month, day, hour);
@@ -258,9 +260,9 @@ void WatchyStarfield::drawMoon()
 void WatchyStarfield::drawSun()
 {
     Dusk2Dawn location(LOC);
-    int year = WatchTime.Local.Year + WatchyGSR::SRTC.getLocalYearOffset();
-    int32_t month = WatchTime.Local.Month;
     int32_t day = WatchTime.Local.Day;
+    int32_t month = WatchTime.Local.Month;
+    int year = WatchTime.Local.Year + WatchyGSR::SRTC.getLocalYearOffset();
     int sunrise = location.sunrise(year, month, day, false);
     int sunset = location.sunset(year, month, day, false);
 
