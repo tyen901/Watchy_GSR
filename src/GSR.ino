@@ -121,18 +121,19 @@ public:
     }
   };
 
-  bool InsertHandlePressed(uint8_t SwitchNumber, bool &Haptic, bool &Refresh)
-  {
-      if (CurrentStyleID() == StarfieldStyle)
-      {
-        StarfieldWatchFace.handleButtonPress(SwitchNumber);
-        Haptic = true;  // Cause Hptic feedback if set to true.
-        Refresh = true; // Cause the screen to be refreshed (redrawn).
-        return true;    // Respond with "I used a button", so the WatchyGSR knows you actually did something with a button.
-      }
+  // bool InsertHandlePressed(uint8_t SwitchNumber, bool &Haptic, bool &Refresh)
+  // {
+  //     if (CurrentStyleID() == StarfieldStyle)
+  //     {
+  //       StarfieldWatchFace.handleButtonPress(SwitchNumber);
+  //       Haptic = true;  // Cause Hptic feedback if set to true.
+  //       Refresh = true; // Cause the screen to be refreshed (redrawn).
+  //       log_e("Button Pressed");
+  //       return true;    // Respond with "I used a button", so the WatchyGSR knows you actually did something with a button.
+  //     }
 
-      return false;
-  };
+  //     return false;
+  // };
 
   /*
       bool OverrideSleepBitmap(){
