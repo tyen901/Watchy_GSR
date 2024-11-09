@@ -1,60 +1,45 @@
 #include "WatchyStarfield.h"
 
-// DARKMODE
-// #define DARKMODE false
-
-// HOUR_SET, change it to 12 to switch to 12-hour
-// #define HOUR_SET 24
-
 // change it to your location
 // latitude, longitude, timezone
 // Currently set to Wellington, NZ
 #define LOC -41.28664, 174.77557, 13
 
-RTC_DATA_ATTR bool DARKMODE = false;
-RTC_DATA_ATTR bool HOUR_SET = true;
-
+WatchyGSR watchyGSR;
 moonPhaser moonP;
+
+bool IsTwentyFourHour()
+{
+    return !watchyGSR.IsAM() && !watchyGSR.IsPM();
+}
 
 void WatchyStarfield::handleButtonPress(uint8_t SwitchNumber)
 {
-    switch (SwitchNumber)
-    {
-    case 2: // Back
-        HOUR_SET = !HOUR_SET;
-        break;
-    case 3: // Up
-        HOUR_SET = !HOUR_SET;
-        break;
-    case 4: // Down
-        DARKMODE = !DARKMODE;
-        break;
-    }
+    //log_e("Button Pressed");
 }
 
 void drawDigit(int x, int y, int digit)
 {
     const unsigned char *digits[] = {dd_0, dd_1, dd_2, dd_3, dd_4, dd_5, dd_6, dd_7, dd_8, dd_9};
-    WatchyGSR::display.drawBitmap(x, y, digits[digit], 16, 25, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
+    WatchyGSR::display.drawBitmap(x, y, digits[digit], 16, 25, watchyGSR.ForeColor());
 }
 
 void drawSmallDigit(int x, int y, int digit) 
 {
     const unsigned char* smallDigits[] = {num_0, num_1, num_2, num_3, num_4, num_5, num_6, num_7, num_8, num_9};
-    WatchyGSR::display.drawBitmap(x, y, smallDigits[digit], 3, 5, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
+    WatchyGSR::display.drawBitmap(x, y, smallDigits[digit], 3, 5, watchyGSR.ForeColor());
 }
 
-void drawLargeDigit(int x, int y, int digit) {
+void drawLargeDigit(int x, int y, int digit)
+{
     const unsigned char* largeDigits[] = {fd_0, fd_1, fd_2, fd_3, fd_4, fd_5, fd_6, fd_7, fd_8, fd_9};
-    WatchyGSR::display.drawBitmap(x, y, largeDigits[digit], 33, 53, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
+    WatchyGSR::display.drawBitmap(x, y, largeDigits[digit], 33, 53, watchyGSR.ForeColor());
 }
 
 void WatchyStarfield::drawWatchFace()
 {
-    WatchyGSR watchyGSR;
-
-    WatchyGSR::display.fillScreen(DARKMODE ? GxEPD_BLACK : GxEPD_WHITE);
-    WatchyGSR::display.setTextColor(DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
+    WatchyGSR::display.fillScreen(watchyGSR.BackColor());
+    WatchyGSR::display.setTextColor(watchyGSR.ForeColor());
 
     drawField();
     drawTime();
@@ -63,7 +48,7 @@ void WatchyStarfield::drawWatchFace()
     drawBattery();
 
     bool isWifiConnected = watchyGSR.WiFiStatus() == WL_CONNECTED;
-    WatchyGSR::display.drawBitmap(118, 168, isWifiConnected ? wifi : wifioff, 25, 18, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
+    WatchyGSR::display.drawBitmap(118, 168, isWifiConnected ? wifi : wifioff, 25, 18, watchyGSR.ForeColor());
 
     //drawWeather();
 
@@ -79,15 +64,17 @@ void WatchyStarfield::drawTime()
     long totalMinutes = WatchTime.Local.Hour * 60 + WatchTime.Local.Minute;
     int hour = totalMinutes / 60;
 
-    if (!HOUR_SET && hour >= 12) {
-        WatchyGSR::display.fillRect(7, 60, 25, 9, DARKMODE ? GxEPD_BLACK : GxEPD_WHITE);
-        WatchyGSR::display.drawBitmap(7, 60, pm, 25, 9, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
-    } else if (!HOUR_SET && hour < 12) {
-        WatchyGSR::display.fillRect(7, 60, 25, 9, DARKMODE ? GxEPD_BLACK : GxEPD_WHITE);
-        WatchyGSR::display.drawBitmap(7, 60, am, 25, 9, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
+    bool Use24HourClock = IsTwentyFourHour();
+
+    if (!Use24HourClock && hour >= 12) {
+        WatchyGSR::display.fillRect(7, 60, 25, 9, watchyGSR.BackColor());
+        WatchyGSR::display.drawBitmap(7, 60, pm, 25, 9, watchyGSR.ForeColor());
+    } else if (!Use24HourClock && hour < 12) {
+        WatchyGSR::display.fillRect(7, 60, 25, 9, watchyGSR.BackColor());
+        WatchyGSR::display.drawBitmap(7, 60, am, 25, 9, watchyGSR.ForeColor());
     }
 
-    if (!HOUR_SET && hour > 12) {
+    if (!Use24HourClock && hour > 12) {
         hour -= 12;
     }
 
@@ -149,7 +136,6 @@ void WatchyStarfield::drawDate()
 
 void WatchyStarfield::drawSteps()
 {
-    WatchyGSR watchyGSR;
     uint32_t stepCount = watchyGSR.CurrentStepCount();
 
     uint32_t stepBarLength = 61 * stepCount / 10000;
@@ -158,7 +144,7 @@ void WatchyStarfield::drawSteps()
         stepBarLength = 61;
     }
 
-    WatchyGSR::display.fillRect(131, 148, stepBarLength, 9, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
+    WatchyGSR::display.fillRect(131, 148, stepBarLength, 9, watchyGSR.ForeColor());
 
     int stepThousands = stepCount / 10000;
     stepCount %= 10000;
@@ -207,12 +193,12 @@ void WatchyStarfield::drawBattery()
 
     int batteryLevel = mapBatteryLevel(VBAT, MinVBAT, MaxVBAT, 0, maxWidth);
 
-    WatchyGSR::display.fillRect(155, 169, batteryLevel, 15, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
+    WatchyGSR::display.fillRect(155, 169, batteryLevel, 15, watchyGSR.ForeColor());
 }
 
 void WatchyStarfield::drawField()
 {
-    WatchyGSR::display.drawBitmap(0, 0, field, 200, 200, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
+    WatchyGSR::display.drawBitmap(0, 0, field, 200, 200, watchyGSR.ForeColor());
 }
 
 void WatchyStarfield::drawMoon()
@@ -254,7 +240,7 @@ void WatchyStarfield::drawMoon()
     else
         index = 6;
 
-    WatchyGSR::display.drawBitmap(131, 74, bitmaps[index], 61, 61, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
+    WatchyGSR::display.drawBitmap(131, 74, bitmaps[index], 61, 61, watchyGSR.ForeColor());
 }
 
 void WatchyStarfield::drawSun()
@@ -273,18 +259,20 @@ void WatchyStarfield::drawSun()
     } else if (currentTimeInMinutes < sunrise) {
         sunPosition = 0;
     }
-    WatchyGSR::display.drawBitmap(110, 132 - sunPosition, arr, 3, 5, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
+    WatchyGSR::display.drawBitmap(110, 132 - sunPosition, arr, 3, 5, watchyGSR.ForeColor());
 
     int sunriseHour = sunrise / 60;
     int sunriseMinute = sunrise % 60;
     int sunsetHour = sunset / 60;
     int sunsetMinute = sunset % 60;
     
-    if (!HOUR_SET && sunriseHour > 12) {
+    bool Use24HourClock = IsTwentyFourHour();
+
+    if (!Use24HourClock && sunriseHour > 12) {
         sunriseHour -= 12;
     }
     
-    if (!HOUR_SET && sunsetHour > 12) {
+    if (!Use24HourClock && sunsetHour > 12) {
         sunsetHour -= 12;
     }
     
@@ -310,8 +298,6 @@ void WatchyStarfield::drawSun()
 
 void WatchyStarfield::drawWeather()
 {
-    WatchyGSR watchyGSR;
-
     int temperature = watchyGSR.GetWeatherTemperature();
     int weatherConditionCode = watchyGSR.GetWeatherID();
 
@@ -332,7 +318,7 @@ void WatchyStarfield::drawWeather()
     }
 
     WatchyGSR::display.println(temperature);
-    WatchyGSR::display.drawBitmap(165, 110, watchyGSR.IsMetric() ? celsius : fahrenheit, 26, 20, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
+    WatchyGSR::display.drawBitmap(165, 110, watchyGSR.IsMetric() ? celsius : fahrenheit, 26, 20, watchyGSR.ForeColor());
     const unsigned char *weatherIcon;
 
     // https://openweathermap.org/weather-conditions
@@ -355,5 +341,5 @@ void WatchyStarfield::drawWeather()
     else
         return;
 
-    WatchyGSR::display.drawBitmap(145, 158, weatherIcon, 48, 32, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
+    WatchyGSR::display.drawBitmap(145, 158, weatherIcon, 48, 32, watchyGSR.ForeColor());
 }
